@@ -6,9 +6,8 @@ const port = 3000;
 app.get("/", (req, res) => {
   res.send("Hello, thomas! welcome to CS326");
 });
-app.get("/projects", (req, res) => {
-  res.send(projects);
-});
+app.use("/", projects);
+
 app.get("/hello/:name", (req, res) => {
   const name = req.params.name;
   res.send(`Hello, ${name}!`);
