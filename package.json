@@ -4,7 +4,7 @@
   "description": "lab 1",
   "repository": {
     "type": "git",
-    "url": "https://github.com/umassmilker/cs326"
+    "url": "https://github.com/umassmilker/web-server"
   },
   "license": "ISC",
   "author": "thomas draghi",
