@@ -1,0 +1,29 @@
+<!docktype html>
+<%
+const dated = events.filter(event => event.date);
+const nondated = events.filter(event => !event.date);
+
+dated.sort((a, b) => new Date(a.date) - new Date(b.date));
+%>
+
+<% if(dated.length !== 0){ %>
+<h2>Events with Dates</h2>
+<ul>
+<% dated.forEach(event => { %>
+  <li><%= event.title %> - <%= event.date %></li>
+<% }); %>
+</ul>
+<% } %>
+
+<% if(nondated.length !== 0){ %>
+<h2>Events without Dates</h2>
+<ul>
+<% nondated.forEach(event => { %>
+  <li><%= event.title %></li>
+<% }); %>
+</ul>
+<% } %>
+
+<% if(events.length === 0){ %>
+<p>No events found.</p>
+<% } %>
