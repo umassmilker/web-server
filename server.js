@@ -11,7 +11,9 @@ app.set('views', 'views');
 app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
+app.get('/about', (req, res) => {
+  res.send("my name is thoams draghi")
+});
 app.get('/entries', async (req, res) => {
   const data = await readFile(DATA_FILE, 'utf-8');
   const entries = JSON.parse(data);
