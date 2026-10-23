@@ -32,6 +32,9 @@ const fetchJSON = async (url, options) => {
   return body;
 };
 
+// htmx waits forever by default. Give its requests the same five seconds.
+htmx.config.timeout = 5000;
+
 // Fill an entry's display: a bold title, then the body. textContent, never
 // innerHTML: titles and bodies are user input, and innerHTML would run them as
 // markup if someone typed a <script> or <img> tag.
@@ -41,11 +44,14 @@ const fillDisplay = (display, entry) => {
   display.replaceChildren(title, ` ${entry.body}`);
 };
 
-const makeButton = (className, label) => {
+const makeButton = (className, label, attributes = {}) => {
   const button = document.createElement('button');
   button.className = className;
   button.type = 'button';
   button.textContent = label;
+  Object.entries(attributes).forEach(([name, value]) => {
+    button.setAttribute(name, value);
+  });
   return button;
 };
 
@@ -55,12 +61,21 @@ const buildItem = (entry) => {
   item.dataset.id = entry.id;
   item.dataset.title = entry.title;
   item.dataset.body = entry.body;
+  item.dataset.favorite = entry.favorite;
 
   const display = document.createElement('span');
   display.className = 'entry-display';
   fillDisplay(display, entry);
 
-  item.append(display, makeButton('edit-btn', 'Edit'), makeButton('delete-btn', 'Delete'));
+  const favoriteButton = makeButton('favorite-btn', entry.favorite ? '★' : '☆');
+  const deleteButton = makeButton('delete-btn', 'Delete', {
+    'hx-delete': `/entries/${entry.id}`,
+    'hx-target': 'closest li',
+    'hx-swap': 'outerHTML',
+    'hx-confirm': 'Delete this entry?',
+    'hx-disabled-elt': 'this',
+  });
+  item.append(display, favoriteButton, makeButton('edit-btn', 'Edit'), deleteButton);
   return item;
 };
 
@@ -89,7 +104,9 @@ form.addEventListener('submit', async (event) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(entry),
     });
-    list.append(buildItem(saved));
+    const item = buildItem(saved);
+    list.append(item);
+    htmx.process(item);
     form.reset();
   } catch (error) {
     alert(`Your entry was not saved. ${error.message}`);
@@ -155,18 +172,34 @@ list.addEventListener('click', async (event) => {
     return;
   }
 
-  if (!event.target.matches('.delete-btn')) return;
+  if (!event.target.matches('.favorite-btn')) return;
 
   const button = event.target;
   const item = button.closest('li');
-  const id = item.dataset.id;
 
   button.disabled = true;
   try {
-    await fetchJSON(`/entries/${id}`, { method: 'DELETE' });
-    item.remove();
+    const saved = await fetchJSON(`/entries/${item.dataset.id}/favorite`, { method: 'PATCH' });
+    item.dataset.favorite = saved.favorite;
+    button.textContent = saved.favorite ? '★' : '☆';
   } catch (error) {
-    alert(`That entry was not deleted. ${error.message}`);
+    alert(`The favorite was not changed. ${error.message}`);
+  } finally {
     button.disabled = false;
   }
 });
+
+// htmx does not swap in an error response, and it tells nobody when a
+// request fails. These are the three ways an hx-delete can fail.
+// Whatever the outcome, htmx itself re-enables the Delete button
+// (hx-disabled-elt) and hides any loading indicator.
+list.addEventListener('htmx:responseError', (event) => {
+  alert(`That entry was not deleted. The server answered ${event.detail.xhr.status}.`);
+});
+list.addEventListener('htmx:sendError', () => {
+  alert('That entry was not deleted. Could not reach the server.');
+});
+list.addEventListener('htmx:timeout', () => {
+  alert('That entry was not deleted. The server did not answer within five seconds.');
+});
+

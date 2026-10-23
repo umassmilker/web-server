@@ -106,3 +106,8 @@ li {
   color: white;
   cursor: pointer;
 }
+.status {
+  min-height: 1.5em;
+  margin: 0 0 1rem;
+  color: #b00020;
+}
