@@ -4,43 +4,44 @@
     <meta charset="UTF-8">
     <title><%= title %></title>
     <link rel="stylesheet" href="/styles.css">
+    <meta
+      name="htmx-config"
+      content='{
+        "timeout": 5000,
+        "responseHandling": [
+          { "code": "204", "swap": false },
+          { "code": "[23]..", "swap": true },
+          { "code": "[45]..", "swap": true, "error": true, "target": "#status", "swapOverride": "innerHTML" }
+        ]
+      }'
+    >
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <script src="/focus.js" defer></script>
   </head>
-  <body>
+  <body
+    hx-on::send-error="document.querySelector('#status').textContent = 'Could not reach the server.'"
+    hx-on::timeout="document.querySelector('#status').textContent = 'The server did not answer within five seconds.'"
+  >
     <%- include('partials/header') %>
     <main>
-      <form id="entry-form">
-        <input type="text" name="title" placeholder="Title">
-        <input type="text" name="body" placeholder="Body">
-        <button type="submit">Add entry</button>
-      </form>
-      <ul id="entries">
+      <%- include('partials/entry-form') %>
+      <%- include('partials/status') %>
+      <ul id="entries" tabindex="-1">
         <% entries.forEach((entry) => { %>
-          <li data-id="<%= entry.id %>" data-title="<%= entry.title %>" data-body="<%= entry.body %>" data-favorite="<%= entry.favorite %>">
-            <span class="entry-display"><strong><%= entry.title %>:</strong> <%= entry.body %></span>
-            <button class="favorite-btn" type="button"><%= entry.favorite ? '★' : '☆' %></button>
-            <button class="edit-btn" type="button">Edit</button>
-            <button
-              class="delete-btn"
-              hx-delete="/entries/<%= entry.id %>"
-              hx-target="closest li"
-              hx-swap="outerHTML"
-              hx-confirm="Delete this entry?"
-              hx-disabled-elt="this"
-            >Delete</button>
-          </li>
+          <%- include('partials/entry', { entry }) %>
         <% }); %>
       </ul>
 
       <section class="classic-form">
         <h2>Classic form (no JavaScript)</h2>
         <form method="POST" action="/entries/classic">
-          <input type="text" name="title" placeholder="Title">
-          <input type="text" name="body" placeholder="Body">
+          <label for="classic-title" class="sr-only">Title</label>
+          <input type="text" id="classic-title" name="title" placeholder="Title">
+          <label for="classic-body" class="sr-only">Body</label>
+          <input type="text" id="classic-body" name="body" placeholder="Body">
           <button type="submit">Add entry the classic way</button>
         </form>
       </section>
     </main>
-    <script src="/app.js" defer></script>
   </body>
 </html>

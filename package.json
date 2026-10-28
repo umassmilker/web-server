@@ -13,7 +13,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "test": "node --experimental-vm-modules node_modules/.bin/jest"
+    "test": "node --experimental-vm-modules node_modules/.bin/jest",
+    "build:css": "tailwindcss -i ./src/input.css -o ./public/style.css"
   },
   "dependencies": {
     "ejs": "^6.0.1",
@@ -23,6 +24,12 @@
   },
   "keywords": [],
   "devDependencies": {
-    "jest": "^30.5.2"
+    "@tailwindcss/cli": "^4.3.3",
+    "jest": "^30.5.2",
+    "tailwindcss": "^4.3.3"
+  },
+  "allowScripts": {
+    "@parcel/watcher@2.5.1": true,
+    "unrs-resolver@1.12.2": true
   }
 }
