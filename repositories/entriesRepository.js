@@ -4,6 +4,8 @@ const entrySchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
     body: { type: String, required: true },
+    favorite: { type: Boolean, default: false },
+    ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   },
   { timestamps: true }
 );

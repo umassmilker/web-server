@@ -17,6 +17,7 @@
     "build:css": "tailwindcss -i ./src/input.css -o ./public/style.css"
   },
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "ejs": "^6.0.1",
     "express": "^5.2.1",
     "mongoose": "^9.11.2",
@@ -30,6 +31,7 @@
   },
   "allowScripts": {
     "@parcel/watcher@2.5.1": true,
-    "unrs-resolver@1.12.2": true
+    "unrs-resolver@1.12.2": true,
+    "bcrypt@6.0.0": true
   }
 }
